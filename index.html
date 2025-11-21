@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Bistro Aktuell – Dienstplan</title>
+
+<style>
+:root{
+  --border:#c8c8c8;
+  --bg:#ffffff;
+  --text:#111;
+  --btn:#f0f0f0;
+  --btn-b:#bbbbbb;
+}
+
+/* Allgemein */
+body{
+  margin:0;
+  font-family:system-ui, Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  padding-bottom:4rem;
+  font-size:15px;
+}
+
+header{
+  position:sticky;
+  top:0;
+  background:#fff;
+  padding:.4rem .6rem;
+  border-bottom:1px solid var(--border);
+  z-index:10;
+}
+
+.brand{
+  font-size:1.4rem;
+  font-weight:800;
+}
+
+.controls{
+  margin-top:.4rem;
+  display:flex;
+  flex-wrap:wrap;
+  gap:.4rem;
+}
+
+button, select{
+  padding:.4rem .6rem;
+  border:1px solid var(--btn-b);
+  background:var(--btn);
+  border-radius:6px;
+  font-size:.95rem;
+  font-weight:600;
+}
+
+.months{
+  display:grid;
+  gap:.8rem;
+  padding:1rem;
+}
+
+.month{
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:1rem;
+  background:#fff;
+}
+
+.month h2{
+  margin:0 0 .6rem 0;
+  text-align:center;
+}
+
+/* Tabelle */
+.table{
+  display:grid;
+  grid-template-columns:60px 1fr 1fr;
+  padding:.4rem 0;
+  border-bottom:1px solid #eee;
+}
+
+.table:last-child{
+  border-bottom:none;
+}
+
+.table div{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:.2rem;
+}
+
+/* Farbkugel */
+.color-dot{
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  border:1px solid #999;
+  margin:auto;
+  cursor:pointer;
+}
+
+/* Farben Palette */
+.palette{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.4rem;
+  margin-top:1rem;
+}
+
+.palette div{
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  border:1px solid #999;
+  cursor:pointer;
+}
+
+/* Service/Küche Switch */
+.switch-area{
+  margin:.5rem 0;
+  display:flex;
+  gap:.4rem;
+}
+
+.active{
+  background:#222;
+  color:white;
+}
+
+/* Mobile Optimierung */
+@media (orientation:landscape){
+  body{ font-size:17px; }
+}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="brand">Bistro Aktuell</div>
+
+  <div class="switch-area">
+    <button id="serviceBtn" class="active">Service</button>
+    <button id="kuecheBtn">Küche</button>
+  </div>
+
+  <div class="controls">
+    <select id="startMonth"></select>
+    <button id="prev3">◀ 3 Monate</button>
+    <button id="next3">3 Monate ▶</button>
+    <button id="saveBtn">Speichern</button>
+    <button id="loadBtn">Laden</button>
+    <button id="pdfBtn">PDF</button>
+  </div>
+</header>
+
+<section class="months" id="months"></section>
+
+<script>
+/* ============================
+   TEIL 1 ENDE – NICHT WEITER!
+ ============================ */
