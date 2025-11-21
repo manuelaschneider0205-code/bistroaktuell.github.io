@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Bistro Aktuell – Dienstplan</title>
+
+<style>
+:root{
+  --border:#c8c8c8;
+  --bg:#ffffff;
+  --text:#111;
+  --btn:#f0f0f0;
+  --btn-b:#bbbbbb;
+}
+
+/* Allgemein */
+body{
+  margin:0;
+  font-family:system-ui, Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  padding-bottom:4rem;
+  font-size:15px;
+}
+
+header{
+  position:sticky;
+  top:0;
+  background:#fff;
+  padding:.4rem .6rem;
+  border-bottom:1px solid var(--border);
+  z-index:10;
+}
+
+.brand{
+  font-size:1.4rem;
+  font-weight:800;
+}
+
+.controls{
+  margin-top:.4rem;
+  display:flex;
+  flex-wrap:wrap;
+  gap:.4rem;
+}
+
+button, select{
+  padding:.4rem .6rem;
+  border:1px solid var(--btn-b);
+  background:var(--btn);
+  border-radius:6px;
+  font-size:.95rem;
+  font-weight:600;
+}
+
+.months{
+  display:grid;
+  gap:.8rem;
+  padding:1rem;
+}
+
+.month{
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:1rem;
+  background:#fff;
+}
+
+.month h2{
+  margin:0 0 .6rem 0;
+  text-align:center;
+}
+
+/* Tabelle */
+.table{
+  display:grid;
+  grid-template-columns:60px 1fr 1fr;
+  padding:.4rem 0;
+  border-bottom:1px solid #eee;
+}
+
+.table:last-child{
+  border-bottom:none;
+}
+
+.table div{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:.2rem;
+}
+
+/* Farbkugel */
+.color-dot{
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  border:1px solid #999;
+  margin:auto;
+  cursor:pointer;
+}
+
+/* Farben Palette */
+.palette{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.4rem;
+  margin-top:1rem;
+}
+
+.palette div{
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  border:1px solid #999;
+  cursor:pointer;
+}
+
+/* Service/Küche Switch */
+.switch-area{
+  margin:.5rem 0;
+  display:flex;
+  gap:.4rem;
+}
+
+.active{
+  background:#222;
+  color:white;
+}
+
+/* Mobile Optimierung */
+@media (orientation:landscape){
+  body{ font-size:17px; }
+}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="brand">Bistro Aktuell</div>
+
+  <div class="switch-area">
+    <button id="serviceBtn" class="active">Service</button>
+    <button id="kuecheBtn">Küche</button>
+  </div>
+
+  <div class="controls">
+    <select id="startMonth"></select>
+    <button id="prev3">◀ 3 Monate</button>
+    <button id="next3">3 Monate ▶</button>
+    <button id="saveBtn">Speichern</button>
+    <button id="loadBtn">Laden</button>
+    <button id="pdfBtn">PDF</button>
+  </div>
+</header>
+
+<section class="months" id="months"></section>
+
+<script>
+/* ============================
+   TEIL 1 ENDE – NICHT WEITER!
+ ============================ */
+  /* ===========================
+      CODE TEIL 2
+   =========================== */
+
+/* Bereich – Service oder Küche */
+let currentDept = "service";
+
+document.getElementById("btn-service").onclick = () => {
+    currentDept = "service";
+    document.getElementById("btn-service").style.background = "#ddd";
+    document.getElementById("btn-kueche").style.background = "#f1f1f1";
+    renderMonths();
+};
+
+document.getElementById("btn-kueche").onclick = () => {
+    currentDept = "kueche";
+    document.getElementById("btn-kueche").style.background = "#ddd";
+    document.getElementById("btn-service").style.background = "#f1f1f1";
+    renderMonths();
+};
+
+
+/* ===========================
+      FARBPALETTE
+   =========================== */
+const colors = {
+  "": "transparent",
+  "hellrot": "#ff9999",
+  "dunkelrot": "#cc0000",
+  "gelb": "#ffd966",
+  "gruen": "#92d050",
+  "hellblau": "#00b0f0",
+  "dunkelblau": "#0066cc",
+  "tuerkis": "#00ffff",
+  "beere": "#a64d79",
+  "grau": "#d9d9d9",
+  "dunkelgrau": "#7f7f7f",
+  "hellbraun": "#c49a6c",
+  "dunkelbraun": "#7b4f25",
+  "gold": "#d4af37",
+  "kupfer": "#b87333",
+  "regenbogen": "linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet)"
+};
+
+
+/* ===========================
+      ZEITAUSWAHL
+   =========================== */
+
+const timeOptions = [
+  "", "10:30", "11:30", "12:00",
+  "13:00", "13:30", "15:00",
+  "16:00", "16:30", "17:00"
+];
+
+
+/* ===========================
+      MONATE RENDERN
+   =========================== */
+
+function renderMonths(){
+    const container = document.getElementById("months");
+    container.innerHTML = "";
+
+    const start = new Date(document.getElementById("startMonth").value + "-01");
+    if(!start.getTime()){
+        return;
+    }
+
+    for(let i = 0; i < 3; i++){
+        const m = new Date(start);
+        m.setMonth(start.getMonth() + i);
+
+        container.appendChild(renderMonth(m));
+    }
+}
+
+function renderMonth(date){
+    const monthDiv = document.createElement("div");
+    monthDiv.className = "month";
+
+    const monthName = date.toLocaleString("de-DE",{month:"long", year:"numeric"});
+    monthDiv.innerHTML = `<h2>${monthName}</h2>`;
+
+    const days = new Date(date.getFullYear(), date.getMonth()+1, 0).getDate();
+
+    for(let d = 1; d <= days; d++){
+        const row = document.createElement("div");
+        row.className = "day-row";
+
+        const dayLabel = document.createElement("div");
+        dayLabel.textContent = d + ".";
+
+        /* Farbauswahl + Zeitfelder */
+        const early = createShiftSelector(date, d, "early");
+        const late  = createShiftSelector(date, d, "late");
+
+        row.appendChild(dayLabel);
+        row.appendChild(early);
+        row.appendChild(late);
+
+        monthDiv.appendChild(row);
+    }
+
+    return monthDiv;
+}
+
+
+/* ===========================
+      Schicht-Zellen
+   =========================== */
+
+function createShiftSelector(date, day, shift){
+    const wrapper = document.createElement("div");
+
+    // Farbfeld + Zeitfeld
+    const colorSelect = document.createElement("select");
+    colorSelect.className = "sel";
+
+    Object.entries(colors).forEach(([key,val])=>{
+        const opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = key;
+        colorSelect.appendChild(opt);
+    });
+
+    const timeSelect = document.createElement("select");
+    timeSelect.className = "sel";
+
+    timeOptions.forEach(t=>{
+        const opt = document.createElement("option");
+        opt.value = t;
+        opt.textContent = t;
+        timeSelect.appendChild(opt);
+    });
+
+    wrapper.appendChild(colorSelect);
+    wrapper.appendChild(timeSelect);
+
+    return wrapper;
+}
+  // ---------------------------
+// Monatsnavigation
+// ---------------------------
+function changeMonth(offset) {
+  const sm = document.getElementById("startMonth");
+  let [year, month] = sm.value.split("-").map(Number);
+  month += offset;
+
+  while (month < 1) { month += 12; year--; }
+  while (month > 12) { month -= 12; year++; }
+
+  sm.value = `${year}-${String(month).padStart(2, "0")}`;
+  generate();
+}
+
+// ---------------------------
+// Speichern der Einträge
+// ---------------------------
+function savePlan() {
+  const data = {};
+
+  document.querySelectorAll(".day").forEach(day => {
+    const date = day.getAttribute("data-date");
+    const colorVal = day.querySelector(".sel").value;
+    const timeVal = day.querySelectorAll(".sel")[1].value;
+
+    data[date] = { color: colorVal, time: timeVal };
+  });
+
+  localStorage.setItem("bistroPlan", JSON.stringify(data));
+  alert("Plan gespeichert!");
+}
+
+// ---------------------------
+// Laden der gespeicherten Daten
+// ---------------------------
+function loadPlan() {
+  const data = JSON.parse(localStorage.getItem("bistroPlan") || "{}");
+
+  document.querySelectorAll(".day").forEach(day => {
+    const date = day.getAttribute("data-date");
+
+    if (data[date]) {
+      const [colorSelect, timeSelect] = day.querySelectorAll(".sel");
+      colorSelect.value = data[date].color;
+      timeSelect.value = data[date].time;
+    }
+  });
+
+  alert("Gespeicherte Einträge geladen!");
+}
+
+// ---------------------------
+// PDF-Export
+// ---------------------------
+function exportPDF() {
+  window.print();
+}
+
+// ---------------------------
+// Buttons verbinden
+// ---------------------------
+document.getElementById("saveBtn").onclick = savePlan;
+document.getElementById("loadBtn").onclick = loadPlan;
+document.getElementById("pdfBtn").onclick = exportPDF;
+
+document.getElementById("prevBtn").onclick = () => changeMonth(-1);
+document.getElementById("nextBtn").onclick = () => changeMonth(1);
+  </script>
+
+</body>
+</html>
