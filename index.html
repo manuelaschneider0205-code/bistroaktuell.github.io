@@ -1,163 +1,140 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>Bistro Aktuell – Dienstplan</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bistro Aktuell</title>
 
-<style>
-:root{
-  --border:#c8c8c8;
-  --bg:#ffffff;
-  --text:#111;
-  --btn:#f0f0f0;
-  --btn-b:#bbbbbb;
-}
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      margin: 0;
+      padding: 20px;
+    }
 
-/* Allgemein */
-body{
-  margin:0;
-  font-family:system-ui, Arial, sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  padding-bottom:4rem;
-  font-size:15px;
-}
+    h1 {
+      text-align: center;
+      color: #222;
+    }
 
-header{
-  position:sticky;
-  top:0;
-  background:#fff;
-  padding:.4rem .6rem;
-  border-bottom:1px solid var(--border);
-  z-index:10;
-}
+    #gerichtListe {
+      margin-top: 20px;
+    }
 
-.brand{
-  font-size:1.4rem;
-  font-weight:800;
-}
+    .gericht {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
 
-.controls{
-  margin-top:.4rem;
-  display:flex;
-  flex-wrap:wrap;
-  gap:.4rem;
-}
+    .btn {
+      margin-top: 10px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      background-color: #008cff;
+      color: white;
+      font-size: 16px;
+      width: 100%;
+    }
 
-button, select{
-  padding:.4rem .6rem;
-  border:1px solid var(--btn-b);
-  background:var(--btn);
-  border-radius:6px;
-  font-size:.95rem;
-  font-weight:600;
-}
+    .btn:hover {
+      background-color: #0071d4;
+    }
 
-.months{
-  display:grid;
-  gap:.8rem;
-  padding:1rem;
-}
-
-.month{
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:1rem;
-  background:#fff;
-}
-
-.month h2{
-  margin:0 0 .6rem 0;
-  text-align:center;
-}
-
-/* Tabelle */
-.table{
-  display:grid;
-  grid-template-columns:60px 1fr 1fr;
-  padding:.4rem 0;
-  border-bottom:1px solid #eee;
-}
-
-.table:last-child{
-  border-bottom:none;
-}
-
-.table div{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:.2rem;
-}
-
-/* Farbkugel */
-.color-dot{
-  width:26px;
-  height:26px;
-  border-radius:50%;
-  border:1px solid #999;
-  margin:auto;
-  cursor:pointer;
-}
-
-/* Farben Palette */
-.palette{
-  display:flex;
-  flex-wrap:wrap;
-  gap:.4rem;
-  margin-top:1rem;
-}
-
-.palette div{
-  width:30px;
-  height:30px;
-  border-radius:50%;
-  border:1px solid #999;
-  cursor:pointer;
-}
-
-/* Service/Küche Switch */
-.switch-area{
-  margin:.5rem 0;
-  display:flex;
-  gap:.4rem;
-}
-
-.active{
-  background:#222;
-  color:white;
-}
-
-/* Mobile Optimierung */
-@media (orientation:landscape){
-  body{ font-size:17px; }
-}
-</style>
+    .sel {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 6px;
+      border: 1px solid #999;
+    }
+  </style>
 </head>
-
 <body>
-<header>
-  <div class="brand">Bistro Aktuell</div>
 
-  <div class="switch-area">
-    <button id="serviceBtn" class="active">Service</button>
-    <button id="kuecheBtn">Küche</button>
-  </div>
+  <h1>Bistro Aktuell</h1>
 
-  <div class="controls">
-    <select id="startMonth"></select>
-    <button id="prev3">◀ 3 Monate</button>
-    <button id="next3">3 Monate ▶</button>
-    <button id="saveBtn">Speichern</button>
-    <button id="loadBtn">Laden</button>
-    <button id="pdfBtn">PDF</button>
-  </div>
-</header>
+  <button class="btn" onclick="addGericht()">Gericht hinzufügen</button>
 
-<section class="months" id="months"></section>
+  <div id="gerichtListe"></div>
+  <script>
+let colors = {
+  "Rot": "#ff4b4b",
+  "Grün": "#4bff72",
+  "Gelb": "#ffe14b",
+  "Blau": "#4b7aff",
+  "Orange": "#ff9a3c"
+};
 
-<script>
-/* ============================
-   TEIL 1 ENDE – NICHT WEITER!
- ============================ */
+let timeOptions = [
+  "08:00", "09:00", "10:00", "11:00",
+  "12:00", "13:00", "14:00", "15:00",
+  "16:00", "17:00"
+];
+
+function addGericht() {
+  const liste = document.getElementById("gerichtListe");
+
+  const feld = document.createElement("div");
+  feld.className = "gericht";
+
+  feld.style.borderLeft = "15px solid gray";
+
+  let titel = document.createElement("input");
+  titel.placeholder = "Gericht eingeben...";
+  titel.className = "sel";
+
+  let preis = document.createElement("input");
+  preis.placeholder = "Preis eingeben...";
+  preis.className = "sel";
+
+  let farbe = createColorTimeSelector(feld);
+
+  feld.appendChild(titel);
+  feld.appendChild(preis);
+  feld.appendChild(farbe);
+
+  liste.appendChild(feld);
+}
+    function createColorTimeSelector(block) {
+  const wrapper = document.createElement("div");
+
+  // Farbwähler
+  const colorSelect = document.createElement("select");
+  colorSelect.className = "sel";
+
+  Object.entries(colors).forEach(([name, value]) => {
+    const opt = document.createElement("option");
+    opt.value = value;
+    opt.textContent = name;
+    colorSelect.appendChild(opt);
+  });
+
+  colorSelect.onchange = () => {
+    block.style.borderLeft = "15px solid " + colorSelect.value;
+  };
+
+  // Zeitwähler
+  const timeSelect = document.createElement("select");
+  timeSelect.className = "sel";
+
+  timeOptions.forEach(t => {
+    const opt = document.createElement("option");
+    opt.value = t;
+    opt.textContent = t;
+    timeSelect.appendChild(opt);
+  });
+
+  wrapper.appendChild(colorSelect);
+  wrapper.appendChild(timeSelect);
+
+  return wrapper;
+    }
+    </script>
+
+</body>
+</html>
